@@ -1,0 +1,367 @@
+import os
+import statistics
+import numpy as np
+import csv
+
+
+
+def inp_height ():
+    
+    height = int(input("Enter your Height in Inches (Must be between 36 and 89 inches): "))
+    
+    # I am ensuring that the height is between 36 and 89 inches
+    count = 1
+    while height < 36 or height > 89:
+        count += 1
+        if not count == 4:
+            print("3 tries only. You are on try: ", count)
+            height = int(input("Enter your Height in Inches (Must be between 36 and 89 inches): "))
+        else:
+            print("Too many tries. Restart program from the beginning.")
+            exit()
+            
+    return height
+
+
+
+def inp_weight ():
+    
+    weight = int(input("Enter your Weight in Pounds (Must be between 50 and 600 pounds): "))
+    
+    # I am ensuring that the weight is between 50 and 700 lbs
+    count = 1
+    while weight < 50 or weight > 600:
+        count += 1
+        if not count == 4:
+            print("3 tries only. You are on try:  ", count)
+            weight = int(input("Enter your Weight in Pounds (Must be between 50 and 600 pounds): "))
+        else:
+            print("Too many tries. Restart program from the beginning.")
+            exit()
+            
+    return weight
+
+
+
+def inp_age ():
+    
+    age = int(input("Enter your Age in Years (Must be between 15 and 100 years old): "))
+    
+    # I am ensuring that the age is between 15 and 100 years old
+    count = 1
+    while age < 15 or age > 100:
+        count += 1
+        if count < 4:
+            print("3 tries only. You are on try: ", count)
+            age = int(input("Enter your Age in Years (Must be between 15 and 100 years old): "))
+        else:
+            print("Too many tries. Restart program from the beginning.")
+            exit()
+            
+    return age
+
+
+
+def inp_gender ():
+    
+    gender = str(input("Enter your Gender. Use 'm' for Male and 'f' for Female: "))
+    
+    # Keeping "m" and "f" lowercase incase uppercase is entered
+    gender = gender.lower()
+    
+    # I am ensuring that the input for gender is only 'm' or 'f'
+    count = 1
+    while gender != "m" and gender != "f":
+        count += 1
+        if count < 4:
+            print("3 tries only. You are on try: ", count)
+            gender = str(input("Use 'm' for Male and 'f' for Female: "))
+            gender = gender.lower()
+        else:
+            print("Too many tries. Restart program from the beginning.")
+            exit()
+    return gender
+
+
+
+def calc_bmi (weight, height):
+    
+    # Calculating Body Mass Index (BMI) which will be used to determine weight category
+    bmi = float((weight * 703) / height ** 2)
+    return bmi
+
+
+
+def bmi_cat (bmi):
+    
+    # This function will assign a BMI category based on the BMI number found previously
+    print("\nYour Body Mass Index (BMI) is: ", bmi)
+    
+    # BMI Categories
+    print("\nThe BMI ranges are:")
+    print("\tObese: Over 30 BMI")
+    print("\tOverweight: = 25.0 BMI - 29.9 BMI")
+    print("\tNormal Weight = 18.5 BMI to 24.9 BMI")
+    print("\tUnderweight = Under 18.5 BMI\n")
+    
+    # Assigning BMI Category
+    if bmi >= 30:
+        print("\tYour BMI is in the \"Obese\" range at: ", bmi, sep="")
+    elif bmi >= 25.0 and bmi <= 29.9:
+        print("\tYour BMI is in the \"Overweight\" range at: ", bmi, sep="")
+    elif bmi >= 18.5 and bmi <= 24.9:
+        print("\tYour BMI is in the \"Normal\" range at: ", bmi, sep="")
+    else:
+        print("\tYour BMI is in the \"Underweight\" range at: ", bmi, sep="")
+
+
+
+def calc_ideal_weight (height):
+    
+    # I will calculate the ideal weight for an individual based on their height.
+    # This weight is found by taking the average of the two extreme values of the "Normal" range of BMI
+    # Then, I reworked the BMI formula to solve for the weight, which will provide the ideal weight
+    
+    #RECALL: BMI = ((weight * 703)/height**2)
+    
+    bmi_normal_avg = float(18.5 + 24.9) / 2
+    
+    # Calculate ideal weight
+    ideal_weight = int((height ** 2 * bmi_normal_avg) / 703)
+    
+    return ideal_weight
+
+
+
+def calc_weight_change (ideal_weight, weight):
+    
+    # I will calculate the change in weight between the ideal weight and the inputted weight
+    weight_change = 0
+    if ideal_weight > weight:
+        weight_change = ideal_weight - weight
+        
+    elif ideal_weight < weight:
+        weight_change = weight - ideal_weight
+        
+    else:
+        weight_change = 0
+        
+    return weight_change
+
+
+
+def weight_adjust (bmi, weight, height):
+    
+    # I will calculate the amount of weight the user must gain or lose to reach their ideal weight
+    
+    ideal_weight = calc_ideal_weight(height)
+    
+    print("\nWeight adjustment needed to reach ideal weight:\n")
+    
+    if bmi >= 18.5 and bmi <= 24.9:
+        print("\tYour BMI is in the Normal range.")
+        print("\tNo weight adjustments necessary.")
+        print("\tExiting the Weight Health Calculator.")
+        exit()
+    elif bmi > 24.9:
+        weight_change = calc_weight_change(ideal_weight, weight)
+        print("\tYou need to lose ", weight_change, "LBS.", sep=" ")
+    else:
+        # For when the BMI number is less than 18.5
+        weight_change = calc_weight_change(ideal_weight, weight)
+        print("\tYou need to gain ", weight_change, "LBS.", sep=" ")
+
+
+def calc_bmr (height, weight, gender, age):
+    # Calculating the Basal Metabolic Rate (BMR) using the Mifflin St. Jeor equations (Different for males/females)
+    
+    print("\nBasal Metabolic Rate (BMR) is calculated using the Mifflin St. Jeor Equations.")
+    print("\nBMR is the number of calories needed for you body to perform its most basic functions at rest.")
+    print("BMR is also known as Resting Metabolic Rate (RMR)\n")
+    
+    bmr = 0
+    if gender == "m":
+        # Mifflin-St Jeor Equation for males
+        bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
+    else:
+        # Mifflin-St Jeor Equation for females
+        bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161
+        
+    print("\tYour BMR is: ", bmr, sep=" ")
+    return int(bmr)
+
+
+
+def calc_met(num_weight):
+    # I created a csv file that estimates the number of METS based on how hard you worked out
+    # A Metabolic Equivalent (MET) is the energy used by the body while at rest (METs ARE AN ESTIMATE)
+      # Performing an activity of 5 METs means you are expending 5 times the energy that you would be sitting still
+      # METs will be used to calculate an estimate of calories burned for a given exercise
+    # The exercise scores range from 1-10, with METs increasing by 1.5 per score
+      # For reference, a full court basketball game roughly equates to 6 METs
+        
+    # To find the Calories burned for that exercise, I use the MET formula: (MET * 3.5 * weight(kgs))/200 = cals/min
+      # I converted kgs to pounds in the formula, and multiplied the formula by exercise_time to find the total calories
+    
+    
+    #Input exercise score to get MET number for calories used
+    score = input("\nEnter exercise score between 1 and 10 "
+                  "\n1 = Light Exercise; 10 = Extremely Rigorous Exercise: ")
+    
+    exercise_time  = int(input("\n Enter exercise time in minutes: "))
+    met = 0
+    
+    #Opening and reading met.csv and creating a dictionary to pull METs based on inputted score
+    with open('met.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        with open('met_new.csv', mode='w') as outfile:
+            writer = csv.writer(outfile)
+            metdict = {rows[0]: rows[1] for rows in reader}
+        met = float(metdict[score])
+        print("\nYour MET Score is: ", met)
+        
+        # Calculating total calories burned for exercise based on METs, weight, and exercise time
+        calories_burned = ((3.5 * met * (num_weight / 2.2))/200) * exercise_time
+        print("You burned ", calories_burned, "calories for your exercise")
+
+
+
+def calorie_log ():
+    # This is where you will input your calories for every day of the week
+    # Input total calories you consumed, as well as total calories of exercise for the day
+          # You can find the calories of exercise by using the previous function (calc_met)
+    # We will then find net calories by subtracting total exercise calories from total consumed calories
+    
+    
+    print("\nThis log will track you calories throughout the week")
+    print("Enter the number of calories consumed & number of calories burned through exercise for 7 days:\n")
+    
+    #Creating lists (arrays) using numpy and appending the calories to these arrays for each day of the week
+    calories_consumed_list = np.array([])
+    exercise_calories_list = np.array([])
+    
+    for i in range(1, 8):
+        # Appending to calories consumed array
+        calories_consumed = int(input(f"\tCalories consumed on day {i}: "))
+        calories_consumed_list = np.append(calories_consumed_list, calories_consumed)
+        
+        # Making sure the values for consumed calories are between 0 and 10,000
+        count = 1
+        while calories_consumed < 0 or calories_consumed > 10000:
+            if count < 3:
+                print("2 tries only. You are on try: ", count)
+                calories_consumed = int(input(f"\tCalories consumed on day {i} (from 0 to 10,000): "))
+                calories_consumed_list = np.append(calories_consumed_list, calories_consumed)
+                count += 1
+            else:
+                print("Too many tries. Restart program from the beginning.")
+                exit()
+        
+        # Appending to exercise calories array
+        exercise_calories = int(input(f"\tExercise calories burned on day {i}: "))
+        exercise_calories_list = np.append(exercise_calories_list, exercise_calories)
+        
+        # Making sure the values for exercise calories are between 0 and 3,000
+        count = 1
+        while exercise_calories < 0 or exercise_calories > 3000:
+            if count < 3:
+                print("2 tries only.  You are on try: ", count)
+                exercise_calories = int(input(f"\tExercise calories burned on day {i} (from 0 and 3,000): "))
+                exercise_calories_list = np.append(exercise_calories_list, exercise_calories)
+                count += 1
+            else:
+                print("Too many tries. Restart program from the beginning.")
+                exit()
+                
+    net_calories_lists = np.sum(calories_consumed_list) - np.sum(exercise_calories_list)
+    mean_calories_consumed_list = np.mean(calories_consumed_list)
+    mean_exercise_calories_list = np.mean(exercise_calories_list)
+    print("\nAverage per day food calories: ", mean_calories_consumed_list, sep="")
+    print("Average per day exercise calories: ", mean_exercise_calories_list, sep="")
+    print("Total calories for one week: ", net_calories_lists, sep="")
+    return net_calories_lists
+
+
+
+def check_gain_or_loss(bmr, net_calories_lists):
+    # Checking if your net calories for the week is more or less than your bmr for the week
+          # If net_calories > bmr: gained weight
+          # If net_calories < bmr: lost weight
+            
+    bmr_week = bmr * 7
+    if net_calories_lists >= bmr_week:
+        print("\nYou gained weight this week")
+    else:
+        print("\nYou lost weight this week")
+
+
+
+def main():
+    # This is the main function. When you call the main function, you will enter the Weight Calculator!!
+    print("Weight Calculator Menu")
+    
+    ans = True
+    while ans:
+        print("""
+        1. Input Individual's Information
+        2. After Entering Personal Information, Find Body Mass Index (BMI) and BMI Category
+        3. After Entering Personal Information, Find Weight Adjustment
+        4. After Entering Personal Information, Find Basal Metabolic Rate (BMR)
+        5. After Entering Personal Information, Estimate Calories Burned for Each Exercise
+        6. Enter One Week Food and Exercise Log
+        7. Find Estimated Weight Change After Finding BMR and Food/Exercise Logging
+        8. Exit/Quit
+        """)
+        
+        ans = input("Please Enter an Input: ")
+        if ans == "1":
+            print("Please enter the following information:\n")
+            
+            # Calling height function
+            num_height = inp_height()
+            
+            # Calling weight function
+            num_weight = inp_weight()
+            
+            # Calling age function
+            num_age = inp_age()
+            
+            # Calling gender function
+            str_gender = inp_gender()
+            
+            # Calling BMI function
+            bmi_number = calc_bmi(num_weight, num_height)
+            
+        elif ans == "2":
+            # Calling bmi category function
+            bmi_cat(bmi_number)
+            
+        elif ans == "3":
+            # Calling weight adjust function
+            weight_adjust(bmi_number, num_weight, num_height)
+            
+        elif ans == "4":
+            # Calling BMR function
+            num_bmr = calc_bmr(num_height, num_weight, str_gender, num_age)
+            
+        elif ans == "5":
+            # Calling MET function
+            calc_met(num_weight)
+            
+        elif ans == "6":
+            # Calling calorie log function
+            weekly_calories = calorie_log()
+            
+        elif ans == "7":
+            # Calling weight check function
+            gain_loss = check_gain_or_loss(num_bmr, weekly_calories)
+            
+        elif ans == "8":
+            print("\n Goodbye")
+            ans = None
+            
+        else:
+            print("\n Not Valid Choice Try again")
+
+# Calling main function            
+main()
